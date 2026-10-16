@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+
+{% block title %}Розклад занять | EduSchedule{% endblock %}
+
+{% block content %}
+<!-- SUMMARY STATS GRID -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon" style="color: var(--accent-cobalt)">👥</div>
+        <div class="stat-info">
+            <h3>{{ groups|length }}</h3>
+            <p>Навчальних груп</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="color: var(--accent-sage)">👨‍🏫</div>
+        <div class="stat-info">
+            <h3>{{ teachers|length }}</h3>
+            <p>Викладачів</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="color: var(--accent-terracotta)">🏫</div>
+        <div class="stat-info">
+            <h3>{{ classrooms|length }}</h3>
+            <p>Аудиторій</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="color: var(--accent-amber)">📚</div>
+        <div class="stat-info">
+            <h3>{{ subjects|length }}</h3>
+            <p>Дисциплін</p>
+        </div>
+    </div>
+    <div class="stat-card" style="border-color: var(--accent-sage);">
+        <div class="stat-icon" style="color: var(--accent-sage)">⭐</div>
+        <div class="stat-info">
+            <h3>{{ pref_stats.satisfaction_rate }}%</h3>
+            <p>Побажань враховано</p>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN PANEL -->
+<div class="glass-panel">
+    <div class="panel-header">
+        <div class="panel-title">
+            <span>📅 Розклад занять</span>
+            {% if total_entries > 0 %}
+                <span class="badge badge-room">
+                    {{ total_entries }} пар у розкладі
+                </span>
+            {% endif %}
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <!-- VIEW SELECTOR TABS -->
+            <div class="view-selector">
+                <a href="{{ url_for('index', view='official', id=groups[0].id if groups else None) }}" 
+                   class="view-btn {% if selected_view == 'official' %}active{% endif %}">
+                    📄 Офіційний бланк
+                </a>
+                <a href="{{ url_for('index', view='group', id=groups[0].id if groups else None) }}" 
+                   class="view-btn {% if selected_view == 'group' %}active{% endif %}">
+                    👥 За групами
+                </a>
+                <a href="{{ url_for('index', view='teacher', id=teachers[0].id if teachers else None) }}" 
+                   class="view-btn {% if selected_view == 'teacher' %}active{% endif %}">
+                    👨‍🏫 За викладачами
+                </a>
+                <a href="{{ url_for('index', view='classroom', id=classrooms[0].id if classrooms else None) }}" 
+                   class="view-btn {% if selected_view == 'classroom' %}active{% endif %}">
+                    🏫 За аудиторіями
+                </a>
+            </div>
+
+            <!-- FILTER DROPDOWN IF APPLICABLE -->
+            {% if selected_view in ['official', 'group'] and groups %}
+                <select id="scheduleFilterSelect" data-view-type="{{ selected_view }}" class="select-dropdown">
+                    {% for g in groups %}
+                        <option value="{{ g.id }}" {% if selected_id == g.id %}selected{% endif %}>
+                            Група: {{ g.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            {% elif selected_view == 'teacher' and teachers %}
+                <select id="scheduleFilterSelect" data-view-type="teacher" class="select-dropdown">
+                    {% for t in teachers %}
+                        <option value="{{ t.id }}" {% if selected_id == t.id %}selected{% endif %}>
+                            Викладач: {{ t.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            {% elif selected_view == 'classroom' and classrooms %}
+                <select id="scheduleFilterSelect" data-view-type="classroom" class="select-dropdown">
+                    {% for c in classrooms %}
+                        <option value="{{ c.id }}" {% if selected_id == c.id %}selected{% endif %}>
+                            Аудиторія: {{ c.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            {% endif %}
+
+            <button onclick="window.print()" class="btn btn-secondary btn-sm" title="Роздрукувати розклад / Друк в PDF">
+                🖨️ Друк / PDF
+            </button>
+        </div>
+    </div>
+
+    {% if total_entries == 0 and not groups %}
+        <div style="text-align: center; padding: 4rem 2rem; color: var(--ink-secondary);">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🗓️</div>
+            <h3 style="color: var(--ink-primary); font-size: 1.3rem; margin-bottom: 0.5rem; font-family: var(--font-heading);">Базу даних очищено</h3>
+            <p style="margin-bottom: 1.5rem;">Усі викладачі, групи та аудиторії видалені. Встановлено 7 пар за розкладом дзвінків. Ви можете додати власні групи, викладачів та предмети в меню зверху.</p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <a href="{{ url_for('groups') }}" class="btn btn-primary">➕ Додати першу групу</a>
+            </div>
+        </div>
+    {% else %}
+
+        <!-- MODE 1: OFFICIAL DOCUMENT VIEW -->
+        {% if selected_view == 'official' %}
+            <div class="official-document-sheet">
+                <!-- DOCUMENT HEADER -->
+                <div class="doc-header">
+                    <div class="doc-stamp">
+                        <div><strong>ЗАТВЕРДЖУЮ</strong></div>
+                        <div>Ректор __________ Олег ЖЕЛЯБСЬКИЙ</div>
+                        <div>«____» ____________ 2026 р.</div>
+                    </div>
+
+                    <div class="doc-title-box">
+                        <h1>РОЗКЛАД</h1>
+                        <h2>занять III курсу освітнього ступеня «бакалавр»</h2>
+                        <h3>на 5-й семестр 2026-2027 н.р.</h3>
+                        <div class="doc-group-badge">Група: {{ selected_group.name if selected_group else 'Всі групи' }}</div>
+                    </div>
+                </div>
+
+                <!-- OFFICIAL DOCUMENT TABLE FORMAT -->
+                <div class="doc-table-wrapper">
+                    <table class="doc-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">День тижня</th>
+                                <th style="width: 20%;">Початок занять / Пара</th>
+                                <th>Дисципліна, викладач, аудиторія</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for day in DAYS_OF_WEEK %}
+                                {% set active_slots = [] %}
+                                {% for slot in time_slots %}
+                                    {% set entries = schedule_grid[day][slot.slot_number] %}
+                                    {% if entries %}
+                                        {% set _ = active_slots.append(slot) %}
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if active_slots %}
+                                    {% for slot in active_slots %}
+                                        <tr>
+                                            {% if loop.first %}
+                                                <td rowspan="{{ active_slots|length }}" class="doc-day-cell">
+                                                    {{ day }}
+                                                </td>
+                                            {% endif %}
+
+                                            <td class="doc-slot-cell">
+                                                <strong>{{ slot.slot_number }} п.</strong> {{ slot.start_time }} – {{ slot.end_time }}
+                                            </td>
+
+                                            <td class="doc-subject-cell">
+                                                {% for entry in schedule_grid[day][slot.slot_number] %}
+                                                    <div class="doc-subject-item">
+                                                        <span class="doc-subject-name">{{ entry.subject.name }}</span>
+                                                        <span class="doc-subject-details">
+                                                            ({{ entry.subject.subject_type }}) — 
+                                                            <strong>{{ entry.classroom.name }}</strong> — 
+                                                            {{ entry.teacher.name }}
+                                                        </span>
+                                                    </div>
+                                                {% endfor %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td class="doc-day-cell">{{ day }}</td>
+                                        <td class="doc-slot-cell" colspan="2" style="color: #666; font-style: italic;">
+                                            Занять немає (Вільний день)
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- DOCUMENT FOOTER -->
+                <div class="doc-footer">
+                    <div>Проректор з навчально-методичної роботи __________________ Віталій НЯНЬКО</div>
+                </div>
+            </div>
+
+        <!-- MODE 2: GRID TABLE VIEW -->
+        {% else %}
+            <div class="schedule-table-wrapper">
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Час / Пара</th>
+                            {% for day in DAYS_OF_WEEK %}
+                                <th>{{ day }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for slot in time_slots %}
+                            <tr>
+                                <td>
+                                    <div class="time-slot-badge">{{ slot.slot_number }} пара</div>
+                                    <div class="time-slot-range">{{ slot.start_time }} – {{ slot.end_time }}</div>
+                                </td>
+
+                                {% for day in DAYS_OF_WEEK %}
+                                    <td>
+                                        {% set entries = schedule_grid[day][slot.slot_number] %}
+                                        {% if entries %}
+                                            {% for entry in entries %}
+                                                <div class="class-card" style="border-left-color: {{ entry.teacher.color }};">
+                                                    <div class="class-title">{{ entry.subject.name }}</div>
+                                                    <div class="class-meta">
+                                                        <span class="badge badge-group">👥 {{ entry.group.name }}</span>
+                                                        <span class="badge badge-room">🏫 {{ entry.classroom.name }}</span>
+                                                        <span class="badge badge-teacher">
+                                                            👨‍🏫 {{ entry.teacher.name }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="empty-slot">•</div>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Побажання викладача {{ teacher.name }} | EduSchedule{% endblock %}
+
+{% block content %}
+<div class="glass-panel">
+    <div class="panel-header">
+        <div>
+            <div class="panel-title">
+                <div style="width: 16px; height: 16px; border-radius: 50%; background: {{ teacher.color }}; display: inline-block;"></div>
+                <span>Побажання щодо розкладу: {{ teacher.name }}</span>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.3rem;">
+                {{ teacher.title }} • Клацніть на часовий слот, щоб змінити зручність (Бажано / Нейтрально / Неможливо)
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <select onchange="location = this.value;" class="select-dropdown">
+                {% for t in all_teachers %}
+                    <option value="{{ url_for('teacher_preferences', teacher_id=t.id) }}" {% if t.id == teacher.id %}selected{% endif %}>
+                        Викладач: {{ t.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <!-- LEGEND BAR -->
+    <div style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem; background: rgba(15, 23, 42, 0.5); padding: 0.75rem 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); align-items: center; flex-wrap: wrap;">
+        <span style="font-weight: 700; font-size: 0.9rem; color: var(--text-secondary);">Позначення:</span>
+        <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 600; font-size: 0.88rem; color: #34d399;">
+            <span>🟢</span> <span>Бажано (Найвищий пріоритет)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 600; font-size: 0.88rem; color: var(--text-muted);">
+            <span>⚪</span> <span>Нейтрально (Звичайний слот)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 600; font-size: 0.88rem; color: #f87171;">
+            <span>🔴</span> <span>Неможливо (Суворо заборонено ставить пару)</span>
+        </div>
+    </div>
+
+    <!-- PREFERENCE FORM & MATRIX -->
+    <form action="{{ url_for('teacher_preferences', teacher_id=teacher.id) }}" method="POST">
+        <div class="schedule-table-wrapper" style="margin-bottom: 1.5rem;">
+            <table class="preference-table">
+                <thead>
+                    <tr>
+                        <th style="width: 12%;">Час / Пара</th>
+                        {% for day in DAYS_OF_WEEK %}
+                            <th>{{ day }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for slot in time_slots %}
+                        <tr>
+                            <td style="background: rgba(30, 41, 59, 0.6); text-align: center;">
+                                <div style="font-weight: 800; color: var(--accent-indigo);">{{ slot.slot_number }} пара</div>
+                                <div style="font-size: 0.78rem; color: var(--text-muted);">{{ slot.start_time }} - {{ slot.end_time }}</div>
+                            </td>
+
+                            {% for day in DAYS_OF_WEEK %}
+                                {% set status = existing_prefs.get((day, slot.slot_number), 'neutral') %}
+                                <td>
+                                    <button type="button" 
+                                            class="pref-btn {{ status }}"
+                                            data-teacher-id="{{ teacher.id }}"
+                                            data-day="{{ day }}"
+                                            data-slot="{{ slot.slot_number }}"
+                                            data-status="{{ status }}">
+                                        
+                                        <span class="pref-status-text">
+                                            {% if status == 'preferred' %}
+                                                🟢 Бажано
+                                            {% elif status == 'unavailable' %}
+                                                🔴 Неможливо
+                                            {% else %}
+                                                ⚪ Нейтрально
+                                            {% endif %}
+                                        </span>
+                                    </button>
+                                    <input type="hidden" name="pref_{{ day }}_{{ slot.slot_number }}" value="{{ status }}">
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <a href="{{ url_for('teachers') }}" class="btn btn-secondary">
+                ← Назад до викладачів
+            </a>
+            <button type="submit" class="btn btn-success">
+                💾 Зберегти всі побажання
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

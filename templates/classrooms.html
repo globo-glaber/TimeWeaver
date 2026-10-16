@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Аудиторії | EduSchedule{% endblock %}
+
+{% block content %}
+<div class="glass-panel">
+    <div class="panel-header">
+        <div class="panel-title">🏫 Навчальні аудиторії</div>
+    </div>
+
+    <!-- ADD CLASSROOM FORM -->
+    <form action="{{ url_for('classrooms') }}" method="POST" style="margin-bottom: 2rem;">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="name">Номер / Назва аудиторії</label>
+                <input type="text" id="name" name="name" class="form-control" placeholder="напр. 204 Комп'ютерний клас" required>
+            </div>
+            <div class="form-group">
+                <label for="capacity">Місткість (місць)</label>
+                <input type="number" id="capacity" name="capacity" class="form-control" value="30" min="5" max="500" required>
+            </div>
+            <div class="form-group">
+                <label for="room_type">Тип аудиторії</label>
+                <select id="room_type" name="room_type" class="form-control select-dropdown">
+                    <option value="Лекційна">Лекційна аудиторія</option>
+                    <option value="Комп'ютерна">Комп'ютерний клас</option>
+                    <option value="Лабораторія">Лабораторія</option>
+                    <option value="Практика">Семінарська / Практична</option>
+                    <option value="Загальна">Загальна</option>
+                </select>
+            </div>
+            <div class="form-group" style="justify-content: flex-end;">
+                <button type="submit" class="btn btn-primary">➕ Додати аудиторію</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- CLASSROOMS TABLE -->
+    <div class="schedule-table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Назва аудиторії</th>
+                    <th>Місткість</th>
+                    <th>Тип приміщення</th>
+                    <th>Дії</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in classrooms %}
+                    <tr>
+                        <td>#{{ c.id }}</td>
+                        <td style="font-weight: 700; color: var(--accent-cyan);">{{ c.name }}</td>
+                        <td>{{ c.capacity }} місць</td>
+                        <td><span class="badge badge-room">{{ c.room_type }}</span></td>
+                        <td>
+                            <form action="{{ url_for('delete_classroom', id=c.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Видалити аудиторію {{ c.name }}?');">
+                                <button type="submit" class="btn btn-danger btn-sm">🗑️ Видалити</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align:center; color: var(--text-muted);">Аудиторій ще не додано</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
