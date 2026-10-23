@@ -1,25 +1,25 @@
 {% extends 'base.html' %}
 
-{% block title %}Дисципліни та пари | EduSchedule{% endblock %}
+{% block title %}Дисципліни | EduSchedule{% endblock %}
 
 {% block content %}
 <div class="glass-panel">
     <div class="panel-header">
-        <div class="panel-title">📚 Навчальні предмети та дисципліни</div>
+        <div class="panel-title">📚 Навчальні дисципліни</div>
     </div>
 
-    <!-- ADD SUBJECT FORM -->
-    <form action="{{ url_for('subjects') }}" method="POST" style="margin-bottom: 2rem;">
+    <!-- FORM FOR ADDING A NEW SUBJECT -->
+    <form action="{{ url_for('main.subjects') }}" method="POST" style="margin-bottom: 2rem;">
         <div class="form-grid">
             <div class="form-group">
-                <label for="name">Назва дисципліни</label>
-                <input type="text" id="name" name="name" class="form-control" placeholder="напр. Веб-технології та Flask" required>
+                <label>Назва дисципліни</label>
+                <input type="text" name="name" class="form-control" placeholder="Вища математика" required>
             </div>
-
+            
             <div class="form-group">
-                <label for="group_id">Навчальна група</label>
-                <select id="group_id" name="group_id" class="form-control select-dropdown" required>
-                    <option value="">-- Оберіть групу --</option>
+                <label>Група</label>
+                <select name="group_id" class="form-control" required>
+                    <option value="" disabled selected>Оберіть групу...</option>
                     {% for g in groups %}
                         <option value="{{ g.id }}">{{ g.name }} ({{ g.student_count }} студ.)</option>
                     {% endfor %}
@@ -27,87 +27,89 @@
             </div>
 
             <div class="form-group">
-                <label for="teacher_id">Викладач</label>
-                <select id="teacher_id" name="teacher_id" class="form-control select-dropdown" required>
-                    <option value="">-- Оберіть викладача --</option>
+                <label>Викладач</label>
+                <select name="teacher_id" class="form-control" required>
+                    <option value="" disabled selected>Оберіть викладача...</option>
                     {% for t in teachers %}
-                        <option value="{{ t.id }}">{{ t.name }} ({{ t.title }})</option>
+                        <option value="{{ t.id }}">{{ t.name }}</option>
                     {% endfor %}
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="hours_per_week">Кількість пар на тиждень</label>
-                <input type="number" id="hours_per_week" name="hours_per_week" class="form-control" value="2" min="1" max="10" required>
+                <label>Пар на тиждень</label>
+                <input type="number" name="hours_per_week" class="form-control" value="2" min="1" max="10" required>
             </div>
 
             <div class="form-group">
-                <label for="subject_type">Вид заняття</label>
-                <select id="subject_type" name="subject_type" class="form-control select-dropdown">
+                <label>Тип заняття</label>
+                <select name="subject_type" class="form-control">
                     <option value="Лекція">Лекція</option>
+                    <option value="Практика">Практичне заняття</option>
                     <option value="Лабораторна">Лабораторна робота</option>
-                    <option value="Практика">Практична робота</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="room_type_required">Необхідний тип аудиторії</label>
-                <select id="room_type_required" name="room_type_required" class="form-control select-dropdown">
-                    <option value="Будь-яка">Будь-яка аудиторія</option>
-                    <option value="Лекційна">Лекційна аудиторія</option>
-                    <option value="Комп'ютерна">Комп'ютерний клас</option>
+                <label>Вимоги до аудиторії</label>
+                <select name="room_type_required" class="form-control">
+                    <option value="Будь-яка">Будь-яка (Загальна)</option>
+                    <option value="Комп'ютерний клас">Комп'ютерний клас</option>
                     <option value="Лабораторія">Лабораторія</option>
-                    <option value="Практика">Семінарська</option>
+                    <option value="Спортзал">Спортзал</option>
                 </select>
             </div>
-
-            <div class="form-group" style="justify-content: flex-end; grid-column: span 1 / -1;">
-                <button type="submit" class="btn btn-primary">➕ Додати предмет у програму</button>
-            </div>
+        </div>
+        
+        <div style="text-align: right;">
+            <button type="submit" class="btn btn-primary" {% if not groups or not teachers %}disabled title="Спочатку додайте хоча б 1 групу та викладача"{% endif %}>
+                ➕ Додати дисципліну в план
+            </button>
         </div>
     </form>
 
-    <!-- SUBJECTS TABLE -->
-    <div class="schedule-table-wrapper">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Предмет</th>
-                    <th>Група</th>
-                    <th>Викладач</th>
-                    <th>Обсяг (пар/тиждень)</th>
-                    <th>Вид / Аудиторія</th>
-                    <th>Дії</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for s in subjects %}
+    <!-- TABLE OF EXISTING SUBJECTS -->
+    {% if subjects %}
+        <div style="overflow-x: auto; border: 2px solid var(--border-ink); border-radius: var(--radius-card);">
+            <table class="data-table">
+                <thead>
                     <tr>
-                        <td style="font-weight: 700; color: var(--text-primary);">{{ s.name }}</td>
-                        <td><span class="badge badge-group">👥 {{ s.group.name }}</span></td>
-                        <td>
-                            <span class="badge" style="background: rgba(255,255,255,0.08); color: var(--text-primary); border: 1px solid var(--border-color);">
-                                <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:{{ s.teacher.color }}; margin-right:4px;"></span>
-                                {{ s.teacher.name }}
-                            </span>
-                        </td>
-                        <td><strong>{{ s.hours_per_week }}</strong> пар на тиждень</td>
-                        <td>
-                            <span class="badge badge-room">{{ s.subject_type }} ({{ s.room_type_required }})</span>
-                        </td>
-                        <td>
-                            <form action="{{ url_for('delete_subject', id=s.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Видалити предмет {{ s.name }}?');">
-                                <button type="submit" class="btn btn-danger btn-sm">🗑️ Видалити</button>
-                            </form>
-                        </td>
+                        <th>Дисципліна</th>
+                        <th>Група</th>
+                        <th>Викладач</th>
+                        <th>Тип / К-сть пар</th>
+                        <th>Вимога до ауд.</th>
+                        <th style="text-align: right;">Дії</th>
                     </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="6" style="text-align:center; color: var(--text-muted);">Предметів ще не додано</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    {% for subj in subjects %}
+                        <tr>
+                            <td><strong>{{ subj.name }}</strong></td>
+                            <td><span class="badge badge-group">{{ subj.group.name }}</span></td>
+                            <td><span class="badge badge-teacher">{{ subj.teacher.name }}</span></td>
+                            <td>{{ subj.subject_type }} <br> <small>({{ subj.hours_per_week }} пар/тижд)</small></td>
+                            <td>{{ subj.room_type_required }}</td>
+                            <td style="text-align: right;">
+                                <form action="{{ url_for('main.delete_subject', id=subj.id) }}" method="POST" style="margin: 0; display: inline;">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Видалити дисципліну?');">
+                                        🗑️ Видалити
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 2rem; color: var(--ink-secondary);">
+            {% if not groups or not teachers %}
+                ⚠️ Щоб додати предмети, спочатку створіть <a href="{{ url_for('main.groups') }}">Групи</a> та <a href="{{ url_for('main.teachers') }}">Викладачів</a>.
+            {% else %}
+                Навчальний план порожній.
+            {% endif %}
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

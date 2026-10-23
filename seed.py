@@ -1,4 +1,5 @@
-from app import app, db, Group, Teacher, Classroom, TimeSlot, Subject, TeacherPreference, ScheduleEntry, DEFAULT_SLOTS
+from app import db
+from app.models import Group, Teacher, Classroom, TimeSlot, Subject, TeacherPreference, ScheduleEntry, DEFAULT_SLOTS
 
 def seed_data():
     """Resets database to completely empty state with 7 Photo 1 time slots."""

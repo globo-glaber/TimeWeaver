@@ -57,19 +57,19 @@
         <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
             <!-- VIEW SELECTOR TABS -->
             <div class="view-selector">
-                <a href="{{ url_for('index', view='official', id=groups[0].id if groups else None) }}" 
+                <a href="{{ url_for('main.index', view='official', id=groups[0].id if groups else None) }}" 
                    class="view-btn {% if selected_view == 'official' %}active{% endif %}">
                     📄 Офіційний бланк
                 </a>
-                <a href="{{ url_for('index', view='group', id=groups[0].id if groups else None) }}" 
+                <a href="{{ url_for('main.index', view='group', id=groups[0].id if groups else None) }}" 
                    class="view-btn {% if selected_view == 'group' %}active{% endif %}">
                     👥 За групами
                 </a>
-                <a href="{{ url_for('index', view='teacher', id=teachers[0].id if teachers else None) }}" 
+                <a href="{{ url_for('main.index', view='teacher', id=teachers[0].id if teachers else None) }}" 
                    class="view-btn {% if selected_view == 'teacher' %}active{% endif %}">
                     👨‍🏫 За викладачами
                 </a>
-                <a href="{{ url_for('index', view='classroom', id=classrooms[0].id if classrooms else None) }}" 
+                <a href="{{ url_for('main.index', view='classroom', id=classrooms[0].id if classrooms else None) }}" 
                    class="view-btn {% if selected_view == 'classroom' %}active{% endif %}">
                     🏫 За аудиторіями
                 </a>
@@ -114,7 +114,7 @@
             <h3 style="color: var(--ink-primary); font-size: 1.3rem; margin-bottom: 0.5rem; font-family: var(--font-heading);">Базу даних очищено</h3>
             <p style="margin-bottom: 1.5rem;">Усі викладачі, групи та аудиторії видалені. Встановлено 7 пар за розкладом дзвінків. Ви можете додати власні групи, викладачів та предмети в меню зверху.</p>
             <div style="display: flex; gap: 1rem; justify-content: center;">
-                <a href="{{ url_for('groups') }}" class="btn btn-primary">➕ Додати першу групу</a>
+                <a href="{{ url_for('main.groups') }}" class="btn btn-primary">➕ Додати першу групу</a>
             </div>
         </div>
     {% else %}

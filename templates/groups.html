@@ -1,62 +1,60 @@
 {% extends 'base.html' %}
 
-{% block title %}Управління групами | EduSchedule{% endblock %}
+{% block title %}Групи | EduSchedule{% endblock %}
 
 {% block content %}
 <div class="glass-panel">
     <div class="panel-header">
-        <div class="panel-title">👥 Навчальні групи</div>
+        <div class="panel-title">👥 Управління групами</div>
     </div>
 
-    <!-- ADD GROUP FORM -->
-    <form action="{{ url_for('groups') }}" method="POST" style="margin-bottom: 2rem;">
-        <div class="form-grid">
-            <div class="form-group">
-                <label for="name">Назва групи (напр. КН-31)</label>
-                <input type="text" id="name" name="name" class="form-control" placeholder="Введіть назву групи..." required>
-            </div>
-            <div class="form-group">
-                <label for="student_count">Кількість студентів</label>
-                <input type="number" id="student_count" name="student_count" class="form-control" value="25" min="1" max="200" required>
-            </div>
-            <div class="form-group" style="justify-content: flex-end;">
-                <button type="submit" class="btn btn-primary">➕ Додати групу</button>
-            </div>
+    <!-- FORM FOR ADDING A NEW GROUP -->
+    <form action="{{ url_for('main.groups') }}" method="POST" class="form-grid" style="align-items: end;">
+        <div class="form-group">
+            <label>Назва групи</label>
+            <input type="text" name="name" class="form-control" placeholder="напр. ІПЗ-21-1" required>
         </div>
+        <div class="form-group">
+            <label>Кількість студентів</label>
+            <input type="number" name="student_count" class="form-control" value="25" min="1" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="height: 44px;">
+            ➕ Додати
+        </button>
     </form>
 
-    <!-- GROUPS TABLE -->
-    <div class="schedule-table-wrapper">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Назва групи</th>
-                    <th>Кількість студентів</th>
-                    <th>Кількість дисциплін</th>
-                    <th>Дії</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for g in groups %}
+    <!-- TABLE OF EXISTING GROUPS -->
+    {% if groups %}
+        <div style="overflow-x: auto; border: 2px solid var(--border-ink); border-radius: var(--radius-card);">
+            <table class="data-table">
+                <thead>
                     <tr>
-                        <td>#{{ g.id }}</td>
-                        <td style="font-weight: 700; color: var(--accent-indigo);">{{ g.name }}</td>
-                        <td>{{ g.student_count }} чол.</td>
-                        <td><span class="badge badge-group">{{ g.subjects|length }} предметів</span></td>
-                        <td>
-                            <form action="{{ url_for('delete_group', id=g.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Видалити групу {{ g.name }}?');">
-                                <button type="submit" class="btn btn-danger btn-sm">🗑️ Видалити</button>
-                            </form>
-                        </td>
+                        <th>Назва групи</th>
+                        <th>Студентів</th>
+                        <th style="text-align: right;">Дії</th>
                     </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="5" style="text-align:center; color: var(--text-muted);">Групи ще не додані</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    {% for group in groups %}
+                        <tr>
+                            <td><strong>{{ group.name }}</strong></td>
+                            <td>{{ group.student_count }} чол.</td>
+                            <td style="text-align: right;">
+                                <form action="{{ url_for('main.delete_group', id=group.id) }}" method="POST" style="margin: 0; display: inline;">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Видалити групу {{ group.name }}? Всі її предмети та розклад також будуть видалені.');">
+                                        🗑️ Видалити
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 2rem; color: var(--ink-secondary);">
+            Груп поки немає. Створіть першу групу вище.
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
