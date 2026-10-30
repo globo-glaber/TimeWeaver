@@ -5,68 +5,67 @@
 {% block content %}
 <div class="glass-panel">
     <div class="panel-header">
-        <div class="panel-title">🏫 Навчальні аудиторії</div>
+        <div class="panel-title">🏫 Аудиторний фонд</div>
     </div>
 
-    <!-- ADD CLASSROOM FORM -->
-    <form action="{{ url_for('classrooms') }}" method="POST" style="margin-bottom: 2rem;">
-        <div class="form-grid">
-            <div class="form-group">
-                <label for="name">Номер / Назва аудиторії</label>
-                <input type="text" id="name" name="name" class="form-control" placeholder="напр. 204 Комп'ютерний клас" required>
-            </div>
-            <div class="form-group">
-                <label for="capacity">Місткість (місць)</label>
-                <input type="number" id="capacity" name="capacity" class="form-control" value="30" min="5" max="500" required>
-            </div>
-            <div class="form-group">
-                <label for="room_type">Тип аудиторії</label>
-                <select id="room_type" name="room_type" class="form-control select-dropdown">
-                    <option value="Лекційна">Лекційна аудиторія</option>
-                    <option value="Комп'ютерна">Комп'ютерний клас</option>
-                    <option value="Лабораторія">Лабораторія</option>
-                    <option value="Практика">Семінарська / Практична</option>
-                    <option value="Загальна">Загальна</option>
-                </select>
-            </div>
-            <div class="form-group" style="justify-content: flex-end;">
-                <button type="submit" class="btn btn-primary">➕ Додати аудиторію</button>
-            </div>
+    <!-- FORM FOR ADDING A NEW CLASSROOM -->
+    <form action="{{ url_for('main.classrooms') }}" method="POST" class="form-grid" style="align-items: end;">
+        <div class="form-group">
+            <label>Номер / Назва аудиторії</label>
+            <input type="text" name="name" class="form-control" placeholder="напр. 301а" required>
         </div>
+        <div class="form-group">
+            <label>Місткість (місць)</label>
+            <input type="number" name="capacity" class="form-control" value="30" min="1" required>
+        </div>
+        <div class="form-group">
+            <label>Тип аудиторії</label>
+            <select name="room_type" class="form-control">
+                <option value="Загальна">Загальна (Лекційна)</option>
+                <option value="Комп'ютерний клас">Комп'ютерний клас</option>
+                <option value="Лабораторія">Лабораторія</option>
+                <option value="Спортзал">Спортзал</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="height: 44px;">
+            ➕ Додати
+        </button>
     </form>
 
-    <!-- CLASSROOMS TABLE -->
-    <div class="schedule-table-wrapper">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Назва аудиторії</th>
-                    <th>Місткість</th>
-                    <th>Тип приміщення</th>
-                    <th>Дії</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for c in classrooms %}
+    <!-- TABLE OF EXISTING CLASSROOMS -->
+    {% if classrooms %}
+        <div style="overflow-x: auto; border: 2px solid var(--border-ink); border-radius: var(--radius-card);">
+            <table class="data-table">
+                <thead>
                     <tr>
-                        <td>#{{ c.id }}</td>
-                        <td style="font-weight: 700; color: var(--accent-cyan);">{{ c.name }}</td>
-                        <td>{{ c.capacity }} місць</td>
-                        <td><span class="badge badge-room">{{ c.room_type }}</span></td>
-                        <td>
-                            <form action="{{ url_for('delete_classroom', id=c.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Видалити аудиторію {{ c.name }}?');">
-                                <button type="submit" class="btn btn-danger btn-sm">🗑️ Видалити</button>
-                            </form>
-                        </td>
+                        <th>Аудиторія</th>
+                        <th>Місткість</th>
+                        <th>Тип</th>
+                        <th style="text-align: right;">Дії</th>
                     </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="5" style="text-align:center; color: var(--text-muted);">Аудиторій ще не додано</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    {% for room in classrooms %}
+                        <tr>
+                            <td><strong>{{ room.name }}</strong></td>
+                            <td>{{ room.capacity }}</td>
+                            <td><span class="badge badge-room">{{ room.room_type }}</span></td>
+                            <td style="text-align: right;">
+                                <form action="{{ url_for('main.delete_classroom', id=room.id) }}" method="POST" style="margin: 0; display: inline;">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Видалити аудиторію {{ room.name }}?');">
+                                        🗑️ Видалити
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 2rem; color: var(--ink-secondary);">
+            Аудиторій поки немає.
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -1,5 +1,5 @@
-import random
-from app import db, Group, Teacher, Classroom, TimeSlot, Subject, TeacherPreference, ScheduleEntry, DAYS_OF_WEEK
+from app import db
+from app.models import Group, Teacher, Classroom, TimeSlot, Subject, TeacherPreference, ScheduleEntry, DAYS_OF_WEEK
 
 def generate_full_schedule():
     """

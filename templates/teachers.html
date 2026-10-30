@@ -8,67 +8,64 @@
         <div class="panel-title">👨‍🏫 Викладацький склад</div>
     </div>
 
-    <!-- ADD TEACHER FORM -->
-    <form action="{{ url_for('teachers') }}" method="POST" style="margin-bottom: 2rem;">
-        <div class="form-grid">
-            <div class="form-group">
-                <label for="name">ПІБ / Звання викладача</label>
-                <input type="text" id="name" name="name" class="form-control" placeholder="напр. д-р Іваненко О. В." required>
-            </div>
-            <div class="form-group">
-                <label for="title">Посада / Вчений ступінь</label>
-                <input type="text" id="title" name="title" class="form-control" value="Доцент">
-            </div>
-            <div class="form-group">
-                <label for="color">Колір у розкладі</label>
-                <input type="color" id="color" name="color" class="form-control" value="#6366f1" style="height: 42px; padding: 2px 6px; cursor: pointer;">
-            </div>
-            <div class="form-group" style="justify-content: flex-end;">
-                <button type="submit" class="btn btn-primary">➕ Додати викладача</button>
-            </div>
+    <!-- FORM FOR ADDING A NEW TEACHER -->
+    <form action="{{ url_for('main.teachers') }}" method="POST" class="form-grid" style="align-items: end;">
+        <div class="form-group">
+            <label>ПІБ Викладача</label>
+            <input type="text" name="name" class="form-control" placeholder="Іванов І.І." required>
         </div>
+        <div class="form-group">
+            <label>Посада / Звання</label>
+            <input type="text" name="title" class="form-control" value="Викладач">
+        </div>
+        <div class="form-group">
+            <label>Колір (для розкладу)</label>
+            <input type="color" name="color" class="form-control" value="#0284c7" style="height: 44px; padding: 0.2rem;">
+        </div>
+        <button type="submit" class="btn btn-primary" style="height: 44px;">
+            ➕ Додати
+        </button>
     </form>
 
-    <!-- TEACHERS TABLE -->
-    <div class="schedule-table-wrapper">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Колір</th>
-                    <th>Викладач</th>
-                    <th>Посада</th>
-                    <th>Предмети</th>
-                    <th>Налаштування побажань</th>
-                    <th>Дії</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for t in teachers %}
+    <!-- TABLE OF EXISTING TEACHERS -->
+    {% if teachers %}
+        <div style="overflow-x: auto; border: 2px solid var(--border-ink); border-radius: var(--radius-card);">
+            <table class="data-table">
+                <thead>
                     <tr>
-                        <td>
-                            <div style="width: 24px; height: 24px; border-radius: 50%; background: {{ t.color }}; border: 2px solid rgba(255,255,255,0.2);"></div>
-                        </td>
-                        <td style="font-weight: 700; color: var(--text-primary);">{{ t.name }}</td>
-                        <td>{{ t.title }}</td>
-                        <td><span class="badge badge-teacher">{{ t.subjects|length }} курсів</span></td>
-                        <td>
-                            <a href="{{ url_for('teacher_preferences', teacher_id=t.id) }}" class="btn btn-secondary btn-sm">
-                                ⚙️ Налаштувати побажання
-                            </a>
-                        </td>
-                        <td>
-                            <form action="{{ url_for('delete_teacher', id=t.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Видалити викладача {{ t.name }}?');">
-                                <button type="submit" class="btn btn-danger btn-sm">🗑️ Видалити</button>
-                            </form>
-                        </td>
+                        <th style="width: 40px;"></th>
+                        <th>Викладач</th>
+                        <th>Посада</th>
+                        <th style="text-align: right;">Дії</th>
                     </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="6" style="text-align:center; color: var(--text-muted);">Викладачів ще не додано</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    {% for teacher in teachers %}
+                        <tr>
+                            <td>
+                                <div style="width: 20px; height: 20px; border-radius: 50%; background-color: {{ teacher.color }}; border: 2px solid var(--border-ink);"></div>
+                            </td>
+                            <td><strong>{{ teacher.name }}</strong></td>
+                            <td>{{ teacher.title }}</td>
+                            <td style="text-align: right; display: flex; justify-content: flex-end; gap: 0.5rem;">
+                                <a href="{{ url_for('main.teacher_preferences', teacher_id=teacher.id) }}" class="btn btn-secondary btn-sm">
+                                    ⚙️ Побажання часу
+                                </a>
+                                <form action="{{ url_for('main.delete_teacher', id=teacher.id) }}" method="POST" style="margin: 0;">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Видалити викладача {{ teacher.name }}?');">
+                                        🗑️ Видалити
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 2rem; color: var(--ink-secondary);">
+            Список викладачів порожній.
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

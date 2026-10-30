@@ -28,7 +28,7 @@
     <!-- NAVBAR -->
     <nav class="navbar">
         <div class="navbar-container">
-            <a href="{{ url_for('index') }}" class="brand-logo">
+            <a href="{{ url_for('main.index') }}" class="brand-logo">
                 <div class="brand-icon">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -50,39 +50,39 @@
 
             <ul class="nav-links">
                 <li>
-                    <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
+                    <a href="{{ url_for('main.index') }}" class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}">
                         <span class="nav-num">01</span> Розклад
                     </a>
                 </li>
                 <li>
-                    <a href="{{ url_for('groups') }}" class="nav-link {% if request.endpoint == 'groups' %}active{% endif %}">
+                    <a href="{{ url_for('main.groups') }}" class="nav-link {% if request.endpoint == 'main.groups' %}active{% endif %}">
                         <span class="nav-num">02</span> Групи
                     </a>
                 </li>
                 <li>
-                    <a href="{{ url_for('teachers') }}" class="nav-link {% if request.endpoint in ['teachers', 'teacher_preferences'] %}active{% endif %}">
+                    <a href="{{ url_for('main.teachers') }}" class="nav-link {% if request.endpoint in ['main.teachers', 'main.teacher_preferences'] %}active{% endif %}">
                         <span class="nav-num">03</span> Викладачі
                     </a>
                 </li>
                 <li>
-                    <a href="{{ url_for('classrooms') }}" class="nav-link {% if request.endpoint == 'classrooms' %}active{% endif %}">
+                    <a href="{{ url_for('main.classrooms') }}" class="nav-link {% if request.endpoint == 'main.classrooms' %}active{% endif %}">
                         <span class="nav-num">04</span> Аудиторії
                     </a>
                 </li>
                 <li>
-                    <a href="{{ url_for('subjects') }}" class="nav-link {% if request.endpoint == 'subjects' %}active{% endif %}">
+                    <a href="{{ url_for('main.subjects') }}" class="nav-link {% if request.endpoint == 'main.subjects' %}active{% endif %}">
                         <span class="nav-num">05</span> Дисципліни
                     </a>
                 </li>
             </ul>
 
             <div class="nav-actions">
-                <form action="{{ url_for('generate_schedule') }}" method="POST" style="margin: 0;">
+                <form action="{{ url_for('main.generate_schedule') }}" method="POST" style="margin: 0;">
                     <button type="submit" class="btn btn-primary">
                         <span class="btn-spark">✦</span> Згенерувати
                     </button>
                 </form>
-                <form action="{{ url_for('clear_all') }}" method="POST" style="margin: 0;" onsubmit="return confirm('Видалити абсолютно всі дані та створити чистий бланк?');">
+                <form action="{{ url_for('main.clear_all') }}" method="POST" style="margin: 0;" onsubmit="return confirm('Видалити абсолютно всі дані та створити чистий бланк?');">
                     <button type="submit" class="btn btn-outline-danger btn-sm" title="Очистити всі дані">
                         Очистити
                     </button>
